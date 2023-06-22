@@ -14,32 +14,45 @@ services:
     ports:
       - "5435:5432"
     networks:
-      - cliente-network
-    restart: always
-
-  cliente:
-    build: .
-    image: bantads_cliente
-    restart: on-failure
-    container_name: bantads_cliente_container
-    command: docker run -p 8080:8080 bantads_cliente
-    volumes:
-      - .:/app
-      - static_data:/app/static
-    networks:
-      - cliente-network
-      - rabbitmq
-    ports:
-      - "8280:8080"
-    depends_on:
       - postgres
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-postgres}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5021:80"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - rabbitmq
 
 volumes:
   postgres:
-  static_data:
+  pgadmin:
+  rabbitmq:
 
 networks:
-  cliente-network:
-    external: false
   rabbitmq:
-    external: true
+    driver: bridge
+  postgres:
+    driver: bridge
+  spring:
+    driver: bridge
