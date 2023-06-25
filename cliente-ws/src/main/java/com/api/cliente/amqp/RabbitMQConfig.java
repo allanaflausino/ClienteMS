@@ -14,8 +14,8 @@ import java.util.Map;
 @Configuration
 public class RabbitMQConfig {
     @Bean
-    @Qualifier("cliente")
-    public Queue clientQueue() { return new Queue("cliente"); }
+    @Qualifier("CLIENTE")
+    public Queue clientQueue() { return new Queue("CLIENTE"); }
 
     @Bean
     public ClienteProducer clienteProducer() { return new ClienteProducer(); }

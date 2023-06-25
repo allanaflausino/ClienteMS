@@ -11,7 +11,7 @@ public class ClienteProducer {
     private RabbitTemplate template;
 
     @Autowired
-    @Qualifier("cliente")
+    @Qualifier("CLIENTE")
     private Queue queue;
 
     public void send(ClienteTransfer clienteTransfer) {
