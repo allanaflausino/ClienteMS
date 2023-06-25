@@ -30,11 +30,14 @@ public class ClienteService {
     public Optional<ClienteModel> findById(UUID id) {
         return clienteRepository.findById(id);
     }
+
     public Optional<ClienteModel> findByEmail(String email) {
         return clienteRepository.findByEmail(email);
     }
 
-    public Optional<ClienteModel> findByCpf(String cpf) { return clienteRepository.findByCpf(cpf); }
+    public Optional<ClienteModel> findByCpf(String cpf) {
+        return clienteRepository.findByCpf(cpf);
+    }
 
     @Transactional
     public void delete(ClienteModel clienteModel) {
@@ -49,5 +52,11 @@ public class ClienteService {
         return clienteRepository.existsByEmail(email);
     }
 
-    public boolean existsByTelefone(String telefone) { return clienteRepository.existsByTelefone(telefone); }
+    public boolean existsByTelefone(String telefone) {
+        return clienteRepository.existsByTelefone(telefone);
+    }
+
+    public ClienteModel inserirCliente(ClienteModel clienteModel) {
+        return clienteRepository.save(clienteModel);
+    }
 }

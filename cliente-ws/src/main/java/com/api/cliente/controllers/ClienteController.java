@@ -1,6 +1,8 @@
 package com.api.cliente.controllers;
 
+import com.api.cliente.dtos.ClienteDto;
 import com.api.cliente.models.ClienteModel;
+import com.api.cliente.repositories.ClienteRepository;
 import com.api.cliente.services.ClienteService;
 
 import org.springframework.data.domain.Page;
@@ -54,5 +56,14 @@ public class ClienteController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente não encontrado.");
         }
         return ResponseEntity.status(HttpStatus.OK).body(clienteModelOptional.get());
+    }
+    @PostMapping("/cliente")
+    public ResponseEntity<Object> inserirCliente(@RequestBody ClienteModel cliente) {
+        Optional<ClienteModel> clienteExistente = clienteService.findByCpf(cliente.getCpf());
+        if (clienteExistente.isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Já existe um cliente com o CPF informado.");
+        }
+        ClienteModel novoCliente = clienteService.inserirCliente(cliente);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novoCliente);
     }
 }
