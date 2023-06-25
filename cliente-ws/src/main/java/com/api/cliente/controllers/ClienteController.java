@@ -5,6 +5,10 @@ import com.api.cliente.models.ClienteModel;
 import com.api.cliente.repositories.ClienteRepository;
 import com.api.cliente.services.ClienteService;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,6 +25,10 @@ import java.util.UUID;
 @RequestMapping("/cliente")
 public class ClienteController {
     final ClienteService clienteService;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public ClienteController(ClienteService clienteService) {
         this.clienteService = clienteService;
@@ -57,13 +65,17 @@ public class ClienteController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(clienteModelOptional.get());
     }
-    @PostMapping("/cliente")
-    public ResponseEntity<Object> inserirCliente(@RequestBody ClienteModel cliente) {
+    @PostMapping
+    public ResponseEntity<Object> inserirCliente(@RequestBody ClienteModel cliente) throws JsonProcessingException {
         Optional<ClienteModel> clienteExistente = clienteService.findByCpf(cliente.getCpf());
         if (clienteExistente.isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Já existe um cliente com o CPF informado.");
         }
         ClienteModel novoCliente = clienteService.inserirCliente(cliente);
+
+        var jsonCliente = objectMapper.writeValueAsString(cliente);
+        rabbitTemplate.convertAndSend("CLIENTE", jsonCliente);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(novoCliente);
     }
 }
